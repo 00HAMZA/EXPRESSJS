@@ -1,8 +1,10 @@
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
-const app = express();
+const { query, params, body, validationResult , checkSchema} = require("express-validator");
+const { checkUsernameValidator } = require("./utils/shema.mjs");
 
+const app = express();
 
 app.use(express.json());
 app.use(morgan("dev"));
@@ -26,18 +28,34 @@ app.get("/", (req, res) => {
 app.use(express.urlencoded({ extended: true }));
 
 const checkLogin = (req, res) => {
+  const result = validationResult(req);
+  const list = result.array();
+  console.log("liiist :", list);
+  console.log("is empty", result.isEmpty());
+
+  console.log("thre result", result);
   console.log(req.body.name);
   console.log(req.body.price);
 
   res.send("Login data received");
 };
 
-app.get("/login", checkLogin);
+app.get(
+  "/login",
+  query("filter")
+    .isString()
+    .withMessage("should be a string")
+    .notEmpty()
+    .withMessage("must not be empty")
+    .isLength({ min: 4, max: 10 })
+    .withMessage("must be between 4 and 10 caracters"),
+  checkLogin,
+);
 const checkId = (request, response, next) => {
   console.log("check is middlware ...");
   next();
 };
-app.use("/products", checkId, (request, response, next) => {
+app.use("/", checkId, (request, response, next) => {
   console.log("finished middlwares checks ...");
   next();
 });
@@ -68,12 +86,18 @@ app.get("/users/:userId/orders/:orderId", (req, res) => {
   console.log(req.body);
 });
 
-app.post("/products", (req, res) => {
-  res.send("product created");
-});
+app.post(
+  "/products",checkSchema(checkUsernameValidator),
+  (req, res) => {
+    const result = validationResult(req);
+    console.log(result);
+    res.send("product created");
+  },
+);
 app.put("/products/:id", (req, res) => {
   res.send("product replaced");
 });
+// validation section
 
 app.listen(3000, () => {
   console.log("Server running");
