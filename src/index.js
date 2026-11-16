@@ -38,16 +38,39 @@ app.listen(Port, () => {
   console.log("Running on port", Port);
 });
 
-app.post("/api/auth", (req, res)=> {
-  const  {body : {username, password} } = req;
-  const findUser = mockUsers.find(u => u.username === username);
-  if(!findUser || findUser.password != password)
-    return res.status(401).send({msg : "BAD CREDENTIALES"});
+app.post("/api/auth", (req, res) => {
+  const {
+    body: { username, password },
+  } = req;
+  const findUser = mockUsers.find((u) => u.username === username);
+  if (!findUser || findUser.password != password)
+    return res.status(401).send({ msg: "BAD CREDENTIALES" });
   console.log("before :", req.session.user);
   req.session.user = findUser;
   console.log("after :", req.session.user);
   return res.status(200).send(findUser);
-})
-app.get("/api/auth/status",(req, res)=> {
-  return req.session.user ? res.status(200).send(req.session.user) : res.status(401).send({msg : "NOT AUTHENTICATED."});
-})
+});
+app.get("/api/auth/status", (req, res) => {
+  console.log(req.session);
+  return req.session.user
+    ? res.status(200).send(req.session.user)
+    : res.status(401).send({ msg: "NOT AUTHENTICATED." });
+});
+
+app.post("/api/cart", (req, res) => {
+  if (!req.session.user) return res.status(401).send("not autorized");
+  const { body: item } = req;
+  const { cart } = req.session;
+  if (cart) {
+    console.log("item :", cart);
+    cart.push(item);
+  } else {
+    req.session.cart = [item];
+  }
+  return res.status(201).send(cart);
+});
+
+app.get("/api/cart", (req, res) => {
+  if (!req.session.user) return res.sendStatus(401);
+  return res.send(req.session.cart);
+});
