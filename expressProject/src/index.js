@@ -12,7 +12,12 @@ app.use(cookieParser());
 app.use("/api", routes);
 
 app.get("/", (req, res) => {
-  res.status(200).send("Route works!");
+  res.cookie("username", "hamza", {
+    maxAge: 1000 * 60 * 60, // 1 hour, in milliseconds
+    httpOnly: true,
+  });
+  res.send("Cookie set");
+
 });
 
 const Port = process.env.PORT || 3000;
