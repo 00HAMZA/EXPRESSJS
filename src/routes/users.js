@@ -3,6 +3,15 @@ const router = express.Router();
 const mockUsers = require("../../data/mockusers");
 
 router.get("/", (req, res) => {
+  console.log("ahaaaa : ",req.session.id);
+  req.sessionStore.get(req.session.id, (err, sessionData) => {
+    if (err) {
+      console.log(err);
+      throw err;
+    }
+
+    console.log("session data :: ", sessionData);
+  });
   const {
     query: { filter, value },
   } = req;
