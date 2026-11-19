@@ -5,7 +5,12 @@ const mockUsers = require("../data/mockusers");
 const routes = require("./routes/index");
 const session = require("express-session");
 const passport = require("passport");
+const path = require("path");
 require("./strategies/local-strategy");
+require("dotenv").config({
+  path: path.resolve(__dirname, "../.env")
+})
+const connectDB = require("../data/db");
 const app = express();
 
 app.use(express.json());
@@ -36,9 +41,9 @@ app.get("/", (req, res) => {
 
 const Port = process.env.PORT || 3000;
 
-app.listen(Port, () => {
+/*app.listen(Port, () => {
   console.log("Running on port", Port);
-});
+});*/
 
 app.post("/api/auth", (req, res) => {
   const {
@@ -79,16 +84,27 @@ app.get("/api/cart", (req, res) => {
   return res.send(req.session.cart);
 });
 
-app.post(
-  "/api/passport",
-  passport.authenticate("local"),
-  (req, res) => {
-    res.send(200);
-  }
-);
-app.get("/api/passport/status", (req, res)=>{
-  console.log("inside passport/status endpoint",);
+app.post("/api/passport", passport.authenticate("local"), (req, res) => {
+  res.send(200);
+});
+app.get("/api/passport/status", (req, res) => {
+  console.log("inside passport/status endpoint");
   console.log(req.user);
   console.log(req.session);
   return req.user ? res.send(req.user) : res.sendStatus(401);
-})
+});
+app.post("/api/passport/logout", (req, res, next) => {
+  req.logout((err) => {
+    if (err) return next(err);
+    res.send({ msg: "logged out", session: req.session });
+  });
+});
+
+const startServer = async () => {
+  await connectDB();
+
+  app.listen(Port, () => {
+    console.log("listening on the port 3000...");
+  });
+};
+startServer();
