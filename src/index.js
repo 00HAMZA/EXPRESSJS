@@ -4,7 +4,8 @@ const mockUsers = require("../data/mockusers");
 
 const routes = require("./routes/index");
 const session = require("express-session");
-
+const passport = require("passport");
+require("./strategies/local-strategy");
 const app = express();
 
 app.use(express.json());
@@ -12,14 +13,15 @@ app.use(cookieParser("myCookieSecret"));
 app.use(
   session({
     secret: "hamza the dev",
-    saveUninitialized: false,
+    saveUninitialized: true,
     resave: false,
     cookie: {
-      maxAge: 100000,
+      maxAge: 30000 * 70,
     },
   }),
 );
-
+app.use(passport.initialize());
+app.use(passport.session());
 // Register all routes
 app.use("/api", routes);
 
@@ -47,11 +49,13 @@ app.post("/api/auth", (req, res) => {
     return res.status(401).send({ msg: "BAD CREDENTIALES" });
   console.log("before :", req.session.user);
   req.session.user = findUser;
-  console.log("after :", req.session.user);
+  req.session.kaka = "tfa7a";
+  console.log("after :", req.session);
+  console.log("tfa7a :", req.session);
   return res.status(200).send(findUser);
 });
 app.get("/api/auth/status", (req, res) => {
-  console.log(req.session);
+  console.log("status :", req.session);
   return req.session.user
     ? res.status(200).send(req.session.user)
     : res.status(401).send({ msg: "NOT AUTHENTICATED." });
@@ -74,3 +78,17 @@ app.get("/api/cart", (req, res) => {
   if (!req.session.user) return res.sendStatus(401);
   return res.send(req.session.cart);
 });
+
+app.post(
+  "/api/passport",
+  passport.authenticate("local"),
+  (req, res) => {
+    res.send(200);
+  }
+);
+app.get("/api/passport/status", (req, res)=>{
+  console.log("inside passport/status endpoint",);
+  console.log(req.user);
+  console.log(req.session);
+  return req.user ? res.send(req.user) : res.sendStatus(401);
+})
