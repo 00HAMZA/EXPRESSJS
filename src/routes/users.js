@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const mockUsers = require("../../data/mockusers");
+const user = require("../mongoose/user");
 
 router.get("/", (req, res) => {
   console.log("ahaaaa : ",req.session.id);
@@ -40,11 +41,21 @@ router.get("/:id", (req, res) => {
   res.status(200).send(findUser);
 });
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   const { body } = req;
-  const newUser = { id: mockUsers[mockUsers.length - 1].id + 1, ...body };
-  mockUsers.push(newUser);
-  return res.status(201).send(newUser);
+const newUser = new user({
+  username : body.username,
+  password : body.password
+});
+  console.log("the new user :", newUser);
+  try{
+    const saveUser = await newUser.save();
+    console.log("passed from here //////////////////")
+    return res.status(200).send(saveUser);
+  }catch(err){
+    console.log(err)
+    return res.sendStatus(400)  
+  }
 });
 
 router.put("/:id", (req, res) => {

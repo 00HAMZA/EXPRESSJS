@@ -6,6 +6,7 @@ const routes = require("./routes/index");
 const session = require("express-session");
 const passport = require("passport");
 const path = require("path");
+const user = require("./mongoose/user");
 require("./strategies/local-strategy");
 require("dotenv").config({
   path: path.resolve(__dirname, "../.env")
@@ -45,18 +46,14 @@ const Port = process.env.PORT || 3000;
   console.log("Running on port", Port);
 });*/
 
-app.post("/api/auth", (req, res) => {
+app.post("/api/auth", async (req, res) => {
   const {
     body: { username, password },
   } = req;
-  const findUser = mockUsers.find((u) => u.username === username);
+  const findUser = await user.findOne({username});
   if (!findUser || findUser.password != password)
     return res.status(401).send({ msg: "BAD CREDENTIALES" });
-  console.log("before :", req.session.user);
   req.session.user = findUser;
-  req.session.kaka = "tfa7a";
-  console.log("after :", req.session);
-  console.log("tfa7a :", req.session);
   return res.status(200).send(findUser);
 });
 app.get("/api/auth/status", (req, res) => {

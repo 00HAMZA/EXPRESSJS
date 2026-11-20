@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon ./src/index.js",
-    "start": "node ./src/app.js"
+    "start": "node ./src/app.js",
+    "user" : "node ./src/routes/index.js"
   },
   "keywords": [],
   "author": "",
