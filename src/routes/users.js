@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const mockUsers = require("../../data/mockusers");
 const user = require("../mongoose/user");
+const hashPassword = require("../../utils/helpers");
 
 router.get("/", (req, res) => {
   console.log("ahaaaa : ",req.session.id);
@@ -45,7 +46,7 @@ router.post("/", async (req, res) => {
   const { body } = req;
 const newUser = new user({
   username : body.username,
-  password : body.password
+  password : hashPassword(body.password)
 });
   console.log("the new user :", newUser);
   try{

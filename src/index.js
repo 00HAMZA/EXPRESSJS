@@ -7,6 +7,7 @@ const session = require("express-session");
 const passport = require("passport");
 const path = require("path");
 const user = require("./mongoose/user");
+const hashPassword = require("../utils/helpers");
 require("./strategies/local-strategy");
 require("dotenv").config({
   path: path.resolve(__dirname, "../.env")
