@@ -1,7 +1,7 @@
 const passport = require("passport");
 const { Strategy } = require("passport-local");
 const user = require("../mongoose/user");
-const  comparepassword  = require("../../utils/helpers");
+const comparepassword = require("../../utils/helpers");
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });

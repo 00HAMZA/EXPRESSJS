@@ -1,17 +1,21 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const mockUsers = require("../data/mockusers");
 
 const routes = require("./routes/index");
 const session = require("express-session");
 const passport = require("passport");
 const path = require("path");
+const googleStrategy = require("passport-google-oauth20");
 const user = require("./mongoose/user");
+const { googleUser } = require("./mongoose/user");
 const hashPassword = require("../utils/helpers");
-require("./strategies/local-strategy");
+const { MongoStore } = require("connect-mongo");
 require("dotenv").config({
-  path: path.resolve(__dirname, "../.env")
-})
+  path: require("path").resolve(__dirname, "../.env"),
+});
+require("./strategies/google.strategy");
+require("./strategies/local-strategy");
+
 const connectDB = require("../data/db");
 const app = express();
 
@@ -22,6 +26,10 @@ app.use(
     secret: "hamza the dev",
     saveUninitialized: true,
     resave: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI,
+      collectionName: "sessiones",
+    }),
     cookie: {
       maxAge: 30000 * 70,
     },
@@ -51,7 +59,7 @@ app.post("/api/auth", async (req, res) => {
   const {
     body: { username, password },
   } = req;
-  const findUser = await user.findOne({username});
+  const findUser = await user.findOne({ username });
   if (!findUser || findUser.password != password)
     return res.status(401).send({ msg: "BAD CREDENTIALES" });
   req.session.user = findUser;
@@ -97,7 +105,10 @@ app.post("/api/passport/logout", (req, res, next) => {
     res.send({ msg: "logged out", session: req.session });
   });
 });
-
+app.get("/api/passport/google", passport.authenticate("google"));
+app.get("/api/passport/google/redirect", passport.authenticate("google"), (req, res)=>{
+  res.send(200);
+})
 const startServer = async () => {
   await connectDB();
 

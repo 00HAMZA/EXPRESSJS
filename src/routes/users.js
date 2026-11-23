@@ -5,7 +5,7 @@ const user = require("../mongoose/user");
 const hashPassword = require("../../utils/helpers");
 
 router.get("/", (req, res) => {
-  console.log("ahaaaa : ",req.session.id);
+  console.log("ahaaaa : ",req.sessionStore);
   req.sessionStore.get(req.session.id, (err, sessionData) => {
     if (err) {
       console.log(err);
